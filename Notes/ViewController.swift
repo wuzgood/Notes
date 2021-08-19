@@ -29,8 +29,15 @@ class ViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Note", for: indexPath)
+        
         cell.textLabel?.text = notes[indexPath.row].title
-        cell.detailTextLabel?.text = notes[indexPath.row].body
+
+        if notes[indexPath.row].body == "" {
+            cell.detailTextLabel?.text = "Empty note"
+        } else {
+            cell.detailTextLabel?.text = notes[indexPath.row].body
+        }
+
         return cell
     }
     
@@ -80,10 +87,15 @@ class ViewController: UITableViewController {
             guard let textField = ac.textFields?[0] else { return }
             
             let newNote = Note(context: self.context)
-            newNote.title = textField.text
             
-            newNote.body = "Hello, world!"
-            
+            if textField.text == "" {
+                newNote.title = "New note"
+            } else {
+                newNote.title = textField.text
+            }
+
+            newNote.body = ""
+
             do {
                 try self.context.save()
             }
