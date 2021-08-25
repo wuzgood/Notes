@@ -9,8 +9,6 @@ import UIKit
 
 class DetailViewController: UIViewController {
     @IBOutlet var textView: UITextView!
-    var noteBody: String?
-    var noteTitle: String?
     var note: Note?
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -23,7 +21,7 @@ class DetailViewController: UIViewController {
     }
     
     func setupTextView() {
-        title = noteTitle
+        title = note?.title
         navigationItem.largeTitleDisplayMode = .never
         
         let rename = UIBarButtonItem(title: "Rename", style: .plain, target: self, action: #selector(renameTapped))
@@ -32,7 +30,7 @@ class DetailViewController: UIViewController {
         let share = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareTapped))
         setToolbarItems([share], animated: true)
         
-        textView.text = noteBody
+        textView.text = note?.body
         
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(saveNote), name: UIApplication.willResignActiveNotification, object: nil)
@@ -46,9 +44,6 @@ class DetailViewController: UIViewController {
             note?.body = textView.text
             
             try context.save()
-            
-            let vc = ViewController()
-            vc.self.fetchNotes()
         }
         catch {
             fatalError("Error saving note.")
@@ -91,7 +86,7 @@ class DetailViewController: UIViewController {
     }
     
     @objc func shareTapped() {
-        guard let noteBody = noteBody else { return }
+        guard let noteBody = note?.body else { return }
         let ac = UIActivityViewController(activityItems: [noteBody], applicationActivities: nil)
         present(ac, animated: true)
     }

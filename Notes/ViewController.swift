@@ -8,7 +8,6 @@
 import UIKit
 
 class ViewController: UITableViewController {
-    
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     var notes = [Note]()
@@ -18,24 +17,26 @@ class ViewController: UITableViewController {
         super.viewDidLoad()
         
         setupUI()
+        fetchNotes()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        fetchNotes()
+        tableView.reloadData()
     }
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Note", for: indexPath)
+        let note = notes[indexPath.row]
         
-        cell.textLabel?.text = notes[indexPath.row].title
+        cell.textLabel?.text = note.title
 
-        if notes[indexPath.row].body == "" {
+        if note.body == "" {
             cell.detailTextLabel?.text = "Empty note"
         } else {
-            cell.detailTextLabel?.text = notes[indexPath.row].body
+            cell.detailTextLabel?.text = note.body
         }
 
         return cell
@@ -47,10 +48,7 @@ class ViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let vc = storyboard?.instantiateViewController(withIdentifier: "Detail") as? DetailViewController {
-            
-            vc.noteTitle = notes[indexPath.row].title
-            vc.noteBody = notes[indexPath.row].body
-            
+  
             vc.note = notes[indexPath.row]
             navigationController?.pushViewController(vc, animated: true)
         }
@@ -102,10 +100,11 @@ class ViewController: UITableViewController {
                 try self.context.save()
             }
             catch {
-                fatalError("Saving error.")
+                print("Saving error.")
             }
             
-            self.fetchNotes()
+            self.notes.append(newNote)
+            self.tableView.reloadData()
         }))
         present(ac, animated: true)
     }
@@ -120,10 +119,11 @@ class ViewController: UITableViewController {
                 try self.context.save()
             }
             catch {
-                
+                print("Saving error.")
             }
             
-            self.fetchNotes()
+            self.notes.remove(at: indexPath.row)
+            self.tableView.reloadData()
         }
         
         return UISwipeActionsConfiguration(actions: [action])
