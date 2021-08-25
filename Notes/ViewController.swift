@@ -81,7 +81,9 @@ class ViewController: UITableViewController {
     
     @objc func createNote() {
         let ac = UIAlertController(title: "Create new note:", message: nil, preferredStyle: .alert)
-        ac.addTextField()
+        ac.addTextField { textfield in
+            textfield.placeholder = "Title"
+        }
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         ac.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
             guard let textField = ac.textFields?[0] else { return }

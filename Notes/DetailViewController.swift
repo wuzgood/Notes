@@ -26,6 +26,12 @@ class DetailViewController: UIViewController {
         title = noteTitle
         navigationItem.largeTitleDisplayMode = .never
         
+        let rename = UIBarButtonItem(title: "Rename", style: .plain, target: self, action: #selector(renameTapped))
+        navigationItem.setRightBarButton(rename, animated: true)
+        
+        let share = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareTapped))
+        setToolbarItems([share], animated: true)
+        
         textView.text = noteBody
         
         let notificationCenter = NotificationCenter.default
@@ -66,6 +72,30 @@ class DetailViewController: UIViewController {
         let selectedRange = textView.selectedRange
         textView.scrollRangeToVisible(selectedRange)
     }
+    
+    @objc func renameTapped() {
+        let ac = UIAlertController(title: "Rename note title", message: nil, preferredStyle: .alert)
+        ac.addTextField { textfield in
+            textfield.text = self.note?.title
+        }
+        ac.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            guard let text = ac.textFields?[0].text else { return }
+            
+            self.note?.title = text
+            self.title = text
+            
+            self.saveNote()
+        }))
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(ac, animated: true)
+    }
+    
+    @objc func shareTapped() {
+        guard let noteBody = noteBody else { return }
+        let ac = UIActivityViewController(activityItems: [noteBody], applicationActivities: nil)
+        present(ac, animated: true)
+    }
+    
     
     /*
      // MARK: - Navigation
