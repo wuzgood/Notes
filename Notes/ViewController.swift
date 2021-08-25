@@ -9,7 +9,6 @@ import UIKit
 
 class ViewController: UITableViewController {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     var notes = [Note]()
     
     
@@ -50,6 +49,14 @@ class ViewController: UITableViewController {
         if let vc = storyboard?.instantiateViewController(withIdentifier: "Detail") as? DetailViewController {
   
             vc.note = notes[indexPath.row]
+            vc.noteDelete = { [weak self] in
+                guard let note = self?.notes[indexPath.row] else { return }
+                self?.context.delete(note)
+                self?.notes.remove(at: indexPath.row)
+                self?.tableView.deleteRows(at: [indexPath], with: .automatic)
+
+                self?.contextSave()
+            }
             navigationController?.pushViewController(vc, animated: true)
         }
     }
@@ -96,15 +103,12 @@ class ViewController: UITableViewController {
 
             newNote.body = ""
 
-            do {
-                try self.context.save()
-            }
-            catch {
-                print("Saving error.")
-            }
+            self.contextSave()
             
             self.notes.append(newNote)
-            self.tableView.reloadData()
+            let indexPath = IndexPath(row: self.notes.count - 1, section: 0)
+            self.tableView.insertRows(at: [indexPath], with: .automatic)
+            self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
         }))
         present(ac, animated: true)
     }
@@ -115,18 +119,22 @@ class ViewController: UITableViewController {
             let note = self.notes[indexPath.row]
             self.context.delete(note)
             
-            do {
-                try self.context.save()
-            }
-            catch {
-                print("Saving error.")
-            }
+            self.contextSave()
             
             self.notes.remove(at: indexPath.row)
-            self.tableView.reloadData()
+            self.tableView.deleteRows(at: [indexPath], with: .automatic)
         }
         
         return UISwipeActionsConfiguration(actions: [action])
+    }
+    
+    func contextSave() {
+        do {
+            try self.context.save()
+        }
+        catch {
+            print("Saving error.")
+        }
     }
 }
 

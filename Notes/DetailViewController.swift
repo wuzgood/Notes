@@ -10,7 +10,7 @@ import UIKit
 class DetailViewController: UIViewController {
     @IBOutlet var textView: UITextView!
     var note: Note?
-    
+    var noteDelete: (() -> Void)?
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     
@@ -28,10 +28,16 @@ class DetailViewController: UIViewController {
         navigationItem.setRightBarButton(rename, animated: true)
         
         let share = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareTapped))
-        setToolbarItems([share], animated: true)
+        let delete = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(deleteTapped))
+        let spacer = UIBarButtonItem(systemItem: .flexibleSpace)
+        setToolbarItems([share, spacer, delete], animated: true)
         
         textView.text = note?.body
         
+        autoSaving()
+    }
+    
+    func autoSaving() {
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(saveNote), name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(saveNote), name: UIApplication.keyboardWillHideNotification, object: nil)
@@ -75,7 +81,6 @@ class DetailViewController: UIViewController {
         }
         ac.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
             guard let text = ac.textFields?[0].text else { return }
-            
             self.note?.title = text
             self.title = text
             
@@ -91,15 +96,13 @@ class DetailViewController: UIViewController {
         present(ac, animated: true)
     }
     
-    
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destination.
-     // Pass the selected object to the new view controller.
-     }
-     */
-    
+    @objc func deleteTapped() {
+        let ac = UIAlertController(title: "Delete this note?", message: nil, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "No", style: .cancel))
+        ac.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { [weak self] _ in
+            self?.navigationController?.popToRootViewController(animated: true)
+            self?.noteDelete?()
+        }))
+        present(ac, animated: true)
+    }
 }
