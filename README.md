@@ -9,4 +9,4 @@ Features implemented in the application:
 * Swipe to delete a note
 * Sharing notes text
 
-<img src = "demo.gif" width = 400 >
+<img src = "demo.gif" width = 350 >
